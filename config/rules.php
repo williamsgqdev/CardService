@@ -24,5 +24,17 @@ return
             "currency" => "required|in:NGN,USD",
             "accountType" => "required|in:Savings,Current",
             "customer_id" => "required"
+        ],
+        "get_customer_accounts" => [
+            "customer_id" => "required"
+        ],
+        "card_request" => [
+            "customer_id" => "required",
+            "account_id" => "required",
+            "type" => "required|in:physical,virtual",
+            "brand" => "required|in:Verve,MasterCard,Visa",
+            "currency" => "required|in:NGN,USD",
+            "issuerCountry" => "required|in:NGA,USA",
+            "status" => "required|in:active,inactive",
         ]
     ];

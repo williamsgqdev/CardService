@@ -14,7 +14,7 @@ class SUDO
         $this->base_url = $config["base_url"];
     }
 
-    private function api_call($payload, $endpoint)
+    private function api_call($endpoint, $payload = null,)
     {
 
         $headers = [
@@ -25,7 +25,7 @@ class SUDO
         $data = json_encode($payload);
 
         $curl = curl_init();
-        curl_setopt_array($curl, array(
+        $opt_array =  array(
             CURLOPT_URL => $this->base_url . $endpoint,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
@@ -33,10 +33,14 @@ class SUDO
             CURLOPT_TIMEOUT => 0,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => $data,
             CURLOPT_HTTPHEADER => $headers
-        ));
+        );
+        if ($payload) {
+            $opt_array[CURLOPT_POSTFIELDS] = $data;
+            $opt_array[CURLOPT_CUSTOMREQUEST] = 'POST';
+        }
+
+        curl_setopt_array($curl, $opt_array);
 
         $response = curl_exec($curl);
 
@@ -94,7 +98,7 @@ class SUDO
 
 
 
-        $response = $this->api_call($payload, $endpoint);
+        $response = $this->api_call($endpoint, $payload);
 
 
         $response = json_decode($response, true);
@@ -117,7 +121,7 @@ class SUDO
             "customerId" => $data->customer_id
         ];
 
-        $response = $this->api_call($payload, $endpoint);
+        $response = $this->api_call($endpoint, $payload);
 
         $response = json_decode($response, true);
 
@@ -127,6 +131,29 @@ class SUDO
         return $data;
     }
 
+    public function getAccount($id)
+    {
+        $endpoint = '/accounts/' . $id;
+        $response = $this->api_call($endpoint);
+        $response = json_decode($response, true);
+
+        $data = $this->process_sudo_code($response);
+
+
+        return $data;
+    }
+
+    public function getCustomer($id)
+    {
+        $endpoint = '/customers/' . $id;
+        $response = $this->api_call($endpoint);
+        $response = json_decode($response, true);
+
+        $data = $this->process_sudo_code($response);
+
+
+        return $data;
+    }
 
     public function process_sudo_code($response)
     {
@@ -168,7 +195,6 @@ class SUDO
 
             $data["data"] = $response;
         }
-
         return $data;
     }
 }

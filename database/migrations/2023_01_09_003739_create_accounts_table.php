@@ -20,11 +20,11 @@ class CreateAccountsTable extends Migration
             $table->string('type');
             $table->string('currency');
             $table->string('accountName');
-            $table->string('accountNumber');
+            $table->string('accountNumber')->nullable();
             $table->string('accountType');
             $table->double('currentBalance', 8, 2);
             $table->double('availableBalance', 8, 2);
-            $table->string('bankCode');
+            $table->string('bankCode')->nullable();
             $table->string('provider');
             $table->string('providerReference');
             $table->string('referenceCode');

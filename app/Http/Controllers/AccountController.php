@@ -38,6 +38,12 @@ class AccountController extends Controller
             return handle_response("Customer not found", 404, 'error');
         }
 
+        $response = $this->state->execute()->getCustomer($request->customer_id);
+
+        if ($response["status"] !=  "success") {
+            return handle_response($response["message"], $response["code"], $response["status"]);
+        }
+
         /*
           Check if the customer was registered with active Provider
         */
@@ -62,9 +68,9 @@ class AccountController extends Controller
                 "type" => $d_simp["type"],
                 "currency" => $d_simp["currency"],
                 "accountName" => $d_simp["accountName"],
-                "bankCode" => $d_simp["bankCode"],
+                "bankCode" => $d_simp["bankCode"] ?? null,
                 "accountType" => $d_simp["accountType"],
-                "accountNumber" => $d_simp["accountNumber"],
+                "accountNumber" => $d_simp["accountNumber"] ?? null,
                 "currentBalance" => $d_simp["currentBalance"],
                 "availableBalance" => $d_simp["availableBalance"],
                 "provider" => $d_simp["provider"],
@@ -83,7 +89,47 @@ class AccountController extends Controller
         return  handle_response($response["message"],  $response["code"], $response["status"], $response["data"] ?? null,);
     }
 
-    public function getCustomerAccount(){
-        
+    public function getCustomerAccounts($customer_id)
+    {
+
+        if (!$customer_id) {
+            return error('Customer Id id required');
+        }
+
+        $customer = Customer::where('third_party_id', $customer_id)->first();
+
+        if (!$customer) {
+           return error('Customer not found');
+        }
+
+        $accounts = Account::where('customer', $customer_id)
+            ->where('user_id', $this->user->id)
+            ->select('customer', 'type', 'currency', 'accountName', 'bankCode', 'accountType', 'accountNumber', 'currentBalance', 'availableBalance', 'third_party_id As account_id')
+            ->paginate(10);
+
+        if (!$accounts) {
+          return  error("Account not found");
+        }
+
+        return handle_response('Accounts Fetched Successfully', 200, 'success', $accounts);
+    }
+
+    public function getAccount($account_id)
+    {
+        if (!$account_id) {
+           return error('Customer Id id required');
+        }
+
+        $account = Account::where('third_party_id', $account_id)
+            ->where('user_id', $this->user->id)
+            ->select('customer', 'type', 'currency', 'accountName', 'bankCode', 'accountType', 'accountNumber', 'currentBalance', 'availableBalance', 'third_party_id As account_id')
+            ->first();
+
+
+        if (!$account) {
+            return error("Account not found");
+        }
+
+        return handle_response('Accounts Fetched Successfully', 200, 'success', $account);
     }
 }
